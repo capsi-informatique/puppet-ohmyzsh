@@ -63,25 +63,81 @@ define ohmyzsh::install (
     require  => Package['git'],
   }
 
-  if $override_template {
-    file { "${home}/.zshrc":
+  if !$ohmyzsh::concat {
+    if $override_template {
+      file { "${home}/.zshrc":
+        ensure  => file,
+        replace => 'no',
+        owner   => $name,
+        group   => $group,
+        mode    => '0644',
+        source  => "puppet:///modules/${module_name}/zshrc.zsh-template",
+        require => Vcsrepo["${home}/.oh-my-zsh"],
+      }
+    } else {
+      exec { "ohmyzsh::cp .zshrc ${name}":
+        creates => "${home}/.zshrc",
+        command => "cp ${home}/.oh-my-zsh/templates/zshrc.zsh-template ${home}/.zshrc",
+        path    => ['/bin', '/usr/bin'],
+        onlyif  => "getent passwd ${name} | cut -d : -f 6 | xargs test -e",
+        user    => $name,
+        require => Vcsrepo["${home}/.oh-my-zsh"],
+        before  => File_Line["ohmyzsh::disable_auto_update ${name}"],
+      }
+    }
+  } else {
+    file { "${home}/.zshrc.local":
       ensure  => file,
       replace => 'no',
       owner   => $name,
       group   => $group,
       mode    => '0644',
-      source  => "puppet:///modules/${module_name}/zshrc.zsh-template",
+      source  => "puppet:///modules/${module_name}/concat/zshrc.local",
       require => Vcsrepo["${home}/.oh-my-zsh"],
     }
-  } else {
-    exec { "ohmyzsh::cp .zshrc ${name}":
-      creates => "${home}/.zshrc",
-      command => "cp ${home}/.oh-my-zsh/templates/zshrc.zsh-template ${home}/.zshrc",
-      path    => ['/bin', '/usr/bin'],
-      onlyif  => "getent passwd ${name} | cut -d : -f 6 | xargs test -e",
-      user    => $name,
+
+    concat { "${home}/.zshrc":
+      ensure  => present,
+      owner   => $name,
+      group   => $group,
+      mode    => '0644',
       require => Vcsrepo["${home}/.oh-my-zsh"],
-      before  => File_Line["ohmyzsh::disable_auto_update ${name}"],
+    }
+
+    concat::fragment { "${home}/.zshrc:puppet":
+      target  => "${home}/.zshrc",
+      content => "### This file is managed by Puppet, any changes will be lost\n### Use the file ~/.zshrc.local for your changes\n",
+      order   => '000',
+    }
+
+    concat::fragment { "${home}/.zshrc:template-010":
+      target => "${home}/.zshrc",
+      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      order  => '010',
+    }
+
+    concat::fragment { "${home}/.zshrc:template-030":
+      target => "${home}/.zshrc",
+      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      order  => '030',
+    }
+
+    concat::fragment { "${home}/.zshrc:template-050":
+      target => "${home}/.zshrc",
+      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      order  => '050',
+    }
+
+    concat::fragment { "${home}/.zshrc:template-070":
+      target => "${home}/.zshrc",
+      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      order  => '070',
+    }
+
+    concat::fragment { "${home}/.zshrc:template-090":
+      target => "${home}/.zshrc",
+      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      order  => '090',
     }
   }
 
@@ -101,10 +157,18 @@ define ohmyzsh::install (
     }
   }
 
-  file_line { "ohmyzsh::disable_auto_update ${name}":
-    path  => "${home}/.zshrc",
-    line  => "DISABLE_AUTO_UPDATE=\"${disable_auto_update}\"",
-    match => '.*DISABLE_AUTO_UPDATE.*',
+  if !$ohmyzsh::concat {
+    file_line { "ohmyzsh::disable_auto_update ${name}":
+      path  => "${home}/.zshrc",
+      line  => "DISABLE_AUTO_UPDATE=\"${disable_auto_update}\"",
+      match => '.*DISABLE_AUTO_UPDATE.*',
+    }
+  } else {
+    concat::fragment { "${home}/.zshrc:DISABLE_AUTO_UPDATE":
+      target  => "${home}/.zshrc",
+      content => "DISABLE_AUTO_UPDATE=\"${disable_auto_update}\"\n",
+      order   => '040',
+    }
   }
 
   # Fix permissions on '~/.oh-my-zsh/cache/completions'

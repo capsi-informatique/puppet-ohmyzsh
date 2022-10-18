@@ -1,0 +1,6 @@
+### Puppet Concat: zshrc-090.zsh-template
+# Load local zshrc if exist
+if [ -f ~/.zshrc.local ]
+then
+    source ~/.zshrc.local
+fi
