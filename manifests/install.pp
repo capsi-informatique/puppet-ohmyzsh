@@ -118,25 +118,25 @@ define ohmyzsh::install (
 
     concat::fragment { "${home}/.zshrc:template-030":
       target => "${home}/.zshrc",
-      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      source => "puppet:///modules/${module_name}/concat/zshrc-030.zsh-template",
       order  => '030',
     }
 
     concat::fragment { "${home}/.zshrc:template-050":
       target => "${home}/.zshrc",
-      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      source => "puppet:///modules/${module_name}/concat/zshrc-050.zsh-template",
       order  => '050',
     }
 
     concat::fragment { "${home}/.zshrc:template-070":
       target => "${home}/.zshrc",
-      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      source => "puppet:///modules/${module_name}/concat/zshrc-070.zsh-template",
       order  => '070',
     }
 
     concat::fragment { "${home}/.zshrc:template-090":
       target => "${home}/.zshrc",
-      source => "puppet:///modules/${module_name}/concat/zshrc-010.zsh-template",
+      source => "puppet:///modules/${module_name}/concat/zshrc-090.zsh-template",
       order  => '090',
     }
   }
